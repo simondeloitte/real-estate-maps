@@ -4,6 +4,13 @@
  */
 
 
+ // Global variables and functions
+ var active_selection = null; // active feauture selected with mouse click for download option
+
+// last feature selection with mouse click is remebered as active selection
+function last_selection(layerFeature) {
+    active_selection = layerFeature;
+}
 
 /**
  * 1. Initialize CRS, map and background layers
@@ -164,6 +171,8 @@ function load_bag() {
     }
 }
 
+
+
 // attributes in popup when clicked
 function onEachFeature(feature, layer) {
     layer.bindPopup(
@@ -173,11 +182,19 @@ function onEachFeature(feature, layer) {
         + '<br><strong>Status:</strong> ' + feature.properties.status.toString()
         + '<br><strong>Aantal verblijfsobjecten:</strong> ' + feature.properties.aantal_verblijfsobjecten.toString()
     );
-    layer.on({
-        click: highlightFeature
-    });
+    layer.on("click", function (e) {
+        highlightFeature(e);
+        last_selection(e.target);
+      });
 }
 
+
+
+/*
+  layer.on({
+    click: highlightFeature
+});
+*/
 
 // load BRK wfs layer
 function load_brk() {
@@ -203,7 +220,6 @@ function load_brk() {
                     style: styleBrk,
                     onEachFeature: onEachFeature2
                 }).addTo(brk_layer);
-                //brk_layer.addTo(map);
             });
         });
     } else {
@@ -340,7 +356,6 @@ const showSuccesfulDownload = function() {
 }
 
 const getReport = async function() {
-    console.log('button clicked');
     if (active_selection !== null) {
         try {
             // selection with mouse click (single object)
@@ -366,7 +381,7 @@ const getReport = async function() {
         Swal.fire({
             icon: 'warning',
             title: 'Download failed',
-            text: 'Please select data first'
+            text: 'Please select one or multiple objects first'
           })
     }
 };
@@ -375,11 +390,14 @@ const getReport = async function() {
 L.easyButton('fa-arrow-down', getReport).addTo(map);
 
 
+
+
 /**  Feature Selection
  *   Select multiple features with lasso tool
  * 
  * 
  */
+
 
 
 const mapElement = document.querySelector('#map');
@@ -392,7 +410,7 @@ const lassoResult = document.querySelector('#lassoResult');
 const lassoControl = L.control.lasso().addTo(map);
 
 
-var active_selection = null; // active feauture selected with mouse click for download option
+
 
 function resetSelectedState() {
     map.eachLayer(layer => {
@@ -421,8 +439,6 @@ function setSelectedLayers(layers) {
 
 
 
-
-
 //map.on('mousedown', () => {
 //    resetSelectedState();
 //});
@@ -432,7 +448,7 @@ map.on('lasso.finished', event => {
 map.on('lasso.enabled', () => {
     if (map.getZoom() < load_wfs_zoom) { 
         Swal.fire({
-            icon: 'warning',
+            icon: 'info',
             title: 'Do you want to select multiple objects?',
             text: 'Please zoom in on the map to enable this feature'
           })
@@ -446,5 +462,3 @@ map.on('lasso.disabled', () => {
 
 lassoControl.setOptions({ intersect: true });
 lassoControl.setPosition('topleft');
-
-
