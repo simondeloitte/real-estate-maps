@@ -219,8 +219,7 @@ function onEachFeature2(feature, layer) {
         + '<br><strong>Perceel grootte:</strong> ' + feature.properties.kadastraleGrootteWaarde.toString() 
         + '<br><strong>Tijdstop registratie:</strong> ' + feature.properties.tijdstipRegistratie.toString() 
         + '<br><strong>Status historie:</strong> ' + feature.properties.statusHistorieWaarde.toString() 
-        + '<br><strong>Gemeente:</strong> ' + feature.properties.kadastraleGemeenteWaarde.toString()
-        + '<br><strong>Sectie:</strong> ' + feature.properties.sectie.toString()
+        + '<br><strong>Gemeente, sectie:</strong> ' + feature.properties.kadastraleGemeenteWaarde.toString() + ', ' + feature.properties.sectie.toString()
     );
     layer.on({
         click: highlightFeature
@@ -327,9 +326,18 @@ const download = function(data) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    showSuccesfulDownload();
 };
 
-
+const showSuccesfulDownload = function() {
+    Swal.fire({
+        position: 'top-end',
+        icon: 'success',
+        title: 'Download succesful',
+        showConfirmButton: false,
+        timer: 1500
+      })
+}
 
 const getReport = async function() {
     console.log('button clicked');
@@ -354,27 +362,17 @@ const getReport = async function() {
         } catch(err) {
             console.log('single object selected');
         }
+    } else {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Download failed',
+            text: 'Please select data first'
+          })
     }
 };
 
 
 L.easyButton('fa-arrow-down', getReport).addTo(map);
-
-/*
-var downloadButton = L.easyButton({
-    states: [{
-    
-        stateName: 'download-data',        // name the state
-        icon:      'fa-globe',               // and define its properties
-        title:     'download data',      // like its title
-        onClick: getReport 
-    }]
-});
-
-downloadButton.addTo(map);
-
-
-*/
 
 
 /**  Feature Selection
@@ -422,6 +420,9 @@ function setSelectedLayers(layers) {
 }
 
 
+
+
+
 //map.on('mousedown', () => {
 //    resetSelectedState();
 //});
@@ -429,10 +430,21 @@ map.on('lasso.finished', event => {
     setSelectedLayers(event.layers);
 });
 map.on('lasso.enabled', () => {
-    resetSelectedState();
+    if (map.getZoom() < load_wfs_zoom) { 
+        Swal.fire({
+            icon: 'warning',
+            title: 'Do you want to select multiple objects?',
+            text: 'Please zoom in on the map to enable this feature'
+          })
+        lassoControl.disable();
+    } else {
+        resetSelectedState();
+    }
 });
 map.on('lasso.disabled', () => {
 });
 
 lassoControl.setOptions({ intersect: true });
 lassoControl.setPosition('topleft');
+
+
