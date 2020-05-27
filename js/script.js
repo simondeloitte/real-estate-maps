@@ -219,6 +219,8 @@ function onEachFeature2(feature, layer) {
         + '<br><strong>Perceel grootte:</strong> ' + feature.properties.kadastraleGrootteWaarde.toString() 
         + '<br><strong>Tijdstop registratie:</strong> ' + feature.properties.tijdstipRegistratie.toString() 
         + '<br><strong>Status historie:</strong> ' + feature.properties.statusHistorieWaarde.toString() 
+        + '<br><strong>Gemeente:</strong> ' + feature.properties.kadastraleGemeenteWaarde.toString()
+        + '<br><strong>Sectie:</strong> ' + feature.properties.sectie.toString()
     );
     layer.on({
         click: highlightFeature
